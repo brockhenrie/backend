@@ -26,6 +26,7 @@ app.use(express.json());
 app.use(morgan('tiny'));
 app.use(authJwt());
 app.use(errorHandler);
+app.use('/public/uploads', express.static(__dirname+'/public/uploads'));
 
 
 //routes
@@ -35,7 +36,7 @@ app.use(`${api}orders/`,ordersRouter );
 app.use(`${api}categories/`,categoriesRouter );
 
 
-mongoose.connect(process.env.DATABASE_CONNECT_DOCKER,{
+mongoose.connect(process.env.DATABASE_CONNECT_CLOUD,{
     useNewUrlParser: true,
     useUnifiedTopology: true,
     dbName: 'eshop-database'
