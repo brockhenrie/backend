@@ -8,10 +8,7 @@ router.get(`/`, async (req, res) => {
     return res.status(404).send(categoryError(404, "Category not found"))
     }
 
-  res.status(200).send({
-    categories: [...categoriesList],
-    success: true,
-  });
+  res.status(200).json(categoriesList);
 });
 
 router.get("/:id", async (req, res) => {
