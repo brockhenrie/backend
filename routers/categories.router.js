@@ -18,10 +18,7 @@ router.get("/:id", async (req, res) => {
     return res.status(404).send(categoryError(404, "Category not found"))
     }
 
-  res.status(200).send({
-    category: category,
-    success: true,
-  });
+  res.status(200).json(category);
 });
 
 router.put("/:id", async (req, res) => {

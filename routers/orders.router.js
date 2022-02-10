@@ -7,13 +7,15 @@ router.get(`/`, async (req, res) => {
   const ordersList = await Order.find()
     .populate("user", "name")
     .sort({ dateOrdered: -1 });
-  res.send(ordersList);
+ 
   if (!ordersList) {
     es.status(500).json({
       error: err,
       success: false,
     });
   }
+
+  res.status(200).json(ordersList);
 });
 
 router.get(`/allData`, async (req, res) => {
@@ -27,17 +29,19 @@ router.get(`/allData`, async (req, res) => {
       },
     })
     .sort({ dateOrdered: -1 });
-  res.send(ordersList);
+ 
   if (!ordersList) {
     es.status(500).json({
       error: err,
       success: false,
     });
+
   }
+  res.status(200).json(ordersList);
 });
 
 router.get(`/:id`, async (req, res) => {
-  const ordersList = await Order.findById(req.params.id)
+  const order = await Order.findById(req.params.id)
     .populate("user", "name")
     .populate({
       path: "orderItems",
@@ -47,13 +51,14 @@ router.get(`/:id`, async (req, res) => {
       },
     })
     .sort({ dateOrdered: -1 });
-  res.send(ordersList);
-  if (!ordersList) {
+  
+  if (!order) {
     es.status(500).json({
       error: err,
       success: false,
     });
   }
+  res.status(200).json(order);
 });
 
 router.get(`/get/userOrders/:id`, async (req, res) => {
@@ -73,10 +78,7 @@ router.get(`/get/userOrders/:id`, async (req, res) => {
         success: false,
       });
     }
-    res.status(200).send({
-        orders:ordersList,
-        success: true
-    });
+    res.status(200).json(ordersList);
   });
   
 
@@ -86,10 +88,7 @@ router.get("/get/count", async (req, res) => {
       return res.status(404).send(orderError(404, "Orders not Found!"));
     }
   
-    res.status(200).send({
-      orderCount: orderCount,
-      success: true,
-    });
+    res.status(200).json(orderCount);
   });
 
   //total sales
@@ -103,10 +102,7 @@ router.get('/get/totalsales', async (req,res)=>{
         return res.status(400).send(orderError(400, 'The order sales cannot be generated'))
     }
 
-    res.status(200).send({
-        totalSales: totalSales.pop().totalsales,
-        success: true
-    })
+    res.status(200).json(totalSales);
 })
 
 router.post(`/`, async (req, res) => {
@@ -154,11 +150,7 @@ router.post(`/`, async (req, res) => {
     return res.status(500).send(orderError(500, "Order not placed"));
   }
 
-  res.status(201).send({
-    order: order,
-    success: true,
-    message: "Order placed!",
-  });
+  res.status(200).json(order); 
 });
 
 router.put("/:id", async (req, res) => {
@@ -174,10 +166,7 @@ router.put("/:id", async (req, res) => {
     return res.status(500).send(orderError(500, "Order not placed!"));
   }
 
-  res.status(201).send({
-    order: order,
-    success: true,
-  });
+  res.status(201).json(order);
 });
 
 router.delete("/:id", async (req, res) => {
@@ -198,12 +187,7 @@ router.delete("/:id", async (req, res) => {
     );
     const deletedIds = await orderItemIds;
 
-    res.status(201).send({
-      order: order,
-      deletedOrderItemIds: deletedIds,
-      message: "Order was deleted!",
-      success: true,
-    });
+    res.status(201).json(order);
   };
 });
 

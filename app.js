@@ -6,13 +6,17 @@ const cors = require('cors');
 const authJwt = require('./helpers/jwt');
 const errorHandler = require('./helpers/error-handler')
 
-
-const app = express();
-
 const api = process.env.API_URL;
 
+const app = express();
+//middleware
 app.use(cors());
 app.options('*', cors());
+app.use(express.json());
+app.use(morgan('tiny'));
+app.use(authJwt());
+app.use(errorHandler);
+app.use('/public/uploads', express.static(__dirname+'/public/uploads'));
 
 
 const productsRouter = require('./routers/products.router');
@@ -21,12 +25,7 @@ const usersRouter = require('./routers/users.router');
 const ordersRouter = require('./routers/orders.router');
 
 
-//middleware
-app.use(express.json());
-app.use(morgan('tiny'));
-app.use(authJwt());
-app.use(errorHandler);
-app.use('/public/uploads', express.static(__dirname+'/public/uploads'));
+
 
 
 //routes

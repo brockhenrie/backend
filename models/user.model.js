@@ -21,11 +21,11 @@ const userSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    street:{
+    address:{
         type: String,
         default: ''
     },
-    apartment:{
+    address2:{
         type: String,
         default: ''
     },
@@ -49,6 +49,9 @@ const userSchema = mongoose.Schema({
 
 userSchema.virtual('id').get(function(){
     return this._id.toHexString();
+});
+userSchema.virtual('password').get(function(){
+    return this.passwordHash
 });
 
 userSchema.set('toJSON',{
