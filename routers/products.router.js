@@ -31,23 +31,23 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-router.get(`/`, async (req, res) => {
-  const productsList = await Product.find().populate("category");
-  if (!productsList) {
-    return res.status(404).send(productError(404, "Products not Found!"));
-  }
-  //.select('name image -_id) after find() to get desired fields
+// router.get(`/`, async (req, res) => {
+//   const productsList = await Product.find().populate("category");
+//   if (!productsList) {
+//     return res.status(404).send(productError(404, "Products not Found!"));
+//   }
+//   //.select('name image -_id) after find() to get desired fields
 
-  res.status(200).json(productsList)
-});
+//   res.status(200).json(productsList)
+// });
 
 router.get(`/`, async (req, res) => {
   let filter = {};
   if (req.query.categories) {
-    filter = { categories: req.query.categories.split(",") };
+    filter = { category: req.query.categories.split(",") };
   }
 
-  const productsList = await Product.find({ category: filter }).populate(
+  const productsList = await Product.find( filter ).populate(
     "category"
   );
   if (!productsList) {

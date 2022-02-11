@@ -3,6 +3,7 @@ const router = express.Router();
 const Category = require("../models/category.model");
 
 router.get(`/`, async (req, res) => {
+  
   const categoriesList = await Category.find()
   if(!categoriesList){
     return res.status(404).send(categoryError(404, "Category not found"))
