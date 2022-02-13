@@ -3,33 +3,32 @@ const Category = require("../models/category.model");
 const router = express.Router();
 const Product = require("../models/product.model");
 const mongoose = require("mongoose");
-const multer = require('multer');
+const multer = require("multer");
 
 const FILE_TYPE_MAP = {
-  'image/png': 'png',
-  'image/jpeg': 'jpeg',
-  'image/jpg': 'jpg',
-
-}
+  "image/png": "png",
+  "image/jpeg": "jpeg",
+  "image/jpg": "jpg",
+};
 
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const isValid = FILE_TYPE_MAP[file.mimetype];
-    let uploadError = new Error('Invalid image type');
+    let uploadError = new Error("Invalid image type");
 
-    if(isValid){
-      uploadError = null
+    if (isValid) {
+      uploadError = null;
     }
-    cb(uploadError, 'public/uploads')
+    cb(uploadError, "public/uploads");
   },
   filename: function (req, file, cb) {
     const extension = FILE_TYPE_MAP[file.mimetype];
-    const fileName = file.originalname.split(' ').join('-');
-    cb(null,`${fileName}-${Date.now()}.${extension}`)
-  }
-})
+    const fileName = file.originalname.split(" ").join("-");
+    cb(null, `${fileName}-${Date.now()}.${extension}`);
+  },
+});
 
-const upload = multer({ storage: storage })
+const upload = multer({ storage: storage });
 
 // router.get(`/`, async (req, res) => {
 //   const productsList = await Product.find().populate("category");
@@ -42,20 +41,21 @@ const upload = multer({ storage: storage })
 // });
 
 router.get(`/`, async (req, res) => {
-  let filter = {};
+  let query = {};
   if (req.query.categories) {
-    filter = { category: req.query.categories.split(",") };
+    query = { category: req.query.categories.split(",") };
   }
 
-  const productsList = await Product.find( filter ).populate(
-    "category"
-  );
+  const productsList = await Product.find(
+    query,
+    (err, products) => {}
+  ).populate("category");
   if (!productsList) {
     return res.status(404).send(productError(404, "Products not Found!"));
   }
   //.select('name image -_id) after find() to get desired fields
 
-  res.status(200).json(productsList)
+  res.status(200).json(productsList);
 });
 
 router.get("/:id", async (req, res) => {
@@ -65,7 +65,7 @@ router.get("/:id", async (req, res) => {
     return res.status(500).send(productError(500, "Product id invalid!"));
   }
 
-  res.status(200).json(product)
+  res.status(200).json(product);
 });
 
 router.get("/get/featured/", async (req, res) => {
@@ -79,7 +79,7 @@ router.get("/get/featured/", async (req, res) => {
       .send(productError(404, "No featured products found!"));
   }
 
-  res.status(200).json(products)
+  res.status(200).json(products);
 });
 
 router.get("/get/count", async (req, res) => {
@@ -88,7 +88,7 @@ router.get("/get/count", async (req, res) => {
     return res.status(404).send(productError(404, "Products not Found!"));
   }
 
-  res.status(200).json(productCount)
+  res.status(200).json(productCount);
 });
 
 router.get("/get/featured/:count", async (req, res) => {
@@ -103,34 +103,34 @@ router.get("/get/featured/:count", async (req, res) => {
       .send(productError(404, "No featured products found!"));
   }
 
-  res.status(200).json(products)
+  res.status(200).json(products);
 });
 
-
-router.put("/:id", upload.single('image'), async (req, res) => {
-if(!mongoose.isValidObjectId(req.params.id)){
-  return res.status(400).json(productError(400,"Invalid product id"))
-}
+router.put("/:id", upload.single("image"), async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json(productError(400, "Invalid product id"));
+  }
 
   const category = await Category.findById(req.body.category);
   if (!category)
     return res.status(500).send(categoryError(500, "Category id invalid!"));
 
-    const product = await Product.findById(req.params.id);
-    if(!product) return res.status(400).send(productError(400, "Product id invalid!"));
+  const product = await Product.findById(req.params.id);
+  if (!product)
+    return res.status(400).send(productError(400, "Product id invalid!"));
 
-    const file = req.file
-    console.log(req.image)
-    let imagePath;
-    if(file){
-      console.log('file added')
-      const fileName = file.filename;
-      const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
-      imagePath = `${basePath}${fileName}`;
-    }else{
-      console.log('file failed');
-      imagePath = product.image;
-    }
+  const file = req.file;
+  console.log(req.image);
+  let imagePath;
+  if (file) {
+    console.log("file added");
+    const fileName = file.filename;
+    const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+    imagePath = `${basePath}${fileName}`;
+  } else {
+    console.log("file failed");
+    imagePath = product.image;
+  }
 
   const newProduct = await Product.findByIdAndUpdate(
     req.params.id,
@@ -166,7 +166,7 @@ router.delete("/:id", async (req, res) => {
   res.status(200).json(product);
 });
 
-router.post(`/`, upload.single('image'), async (req, res) => {
+router.post(`/`, upload.single("image"), async (req, res) => {
   const category = await Category.findById(req.body.category);
   const file = req.file;
   if (!category) {
@@ -174,14 +174,13 @@ router.post(`/`, upload.single('image'), async (req, res) => {
       .status(400)
       .send(categoryError(err, 400, "Category id invalid!"));
   }
-  if(!file){
-    return res.status(400).json(productError(400,"No image in request"))
+  if (!file) {
+    return res.status(400).json(productError(400, "No image in request"));
   }
- 
-  const fileName = file.filename;
-  const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
 
-  
+  const fileName = file.filename;
+  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+
   let product = new Product({
     name: req.body.name,
     description: req.body.description,
@@ -201,40 +200,42 @@ router.post(`/`, upload.single('image'), async (req, res) => {
     return res.status(400).send(productError(err, 500, "Product not saved!"));
   }
 
-  res.status(201).json(product)
-});
-
-router.put("/gallery-images/:id", upload.array('images', 10), async (req, res) => {
-  if(!mongoose.isValidObjectId(req.params.id)){
-    return res.status(400).json(productError(400,"Invalid product id"))
-  }
-
-  const files = req.files;
-  let imagePaths = [];
-  const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
-  if(files){
-    files.map(file=>
-      imagePaths.push(`${basePath}${file.filename}`))
-  }
-  if(!files){
-    return res.status(400).json(productError(400,"no images in request"));
-  }
- 
-  const product = await Product.findByIdAndUpdate(
-    req.params.id,
-    {
-      images: imagePaths
-    },
-    { new: true }
-  ).populate("category");
-
-  if (!product) {
-    return res.status(500).send(productError(500, "Product id invalid!"));
-  }
-
   res.status(201).json(product);
-
 });
+
+router.put(
+  "/gallery-images/:id",
+  upload.array("images", 10),
+  async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json(productError(400, "Invalid product id"));
+    }
+
+    const files = req.files;
+    let imagePaths = [];
+    const basePath = `${req.protocol}://${req.get("host")}/public/upload/`;
+    if (files) {
+      files.map((file) => imagePaths.push(`${basePath}${file.filename}`));
+    }
+    if (!files) {
+      return res.status(400).json(productError(400, "no images in request"));
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        images: imagePaths,
+      },
+      { new: true }
+    ).populate("category");
+
+    if (!product) {
+      return res.status(500).send(productError(500, "Product id invalid!"));
+    }
+
+    res.status(201).json(product);
+  }
+);
 
 function productError(code, message) {
   return {
