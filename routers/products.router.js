@@ -46,10 +46,7 @@ router.get(`/`, async (req, res) => {
     query = { category: req.query.categories.split(",") };
   }
 
-  const productsList = await Product.find(
-    query,
-    (err, products) => {}
-  ).populate("category");
+  const productsList = await Product.find(query).populate("category");
   if (!productsList) {
     return res.status(404).send(productError(404, "Products not Found!"));
   }
