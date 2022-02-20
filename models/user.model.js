@@ -30,7 +30,7 @@ const userSchema = mongoose.Schema({
         default: ''
     },
     city:{
-        type: String,
+        type: String, 
         default: ''
     },
     state:{

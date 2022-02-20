@@ -8,7 +8,7 @@
     "start": "nodemon app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Brock Henrie",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,6 +17,7 @@
     "dotenv": "^14.3.2",
     "express": "^4.17.2",
     "express-jwt": "^6.1.0",
+    "jshint": "^2.13.4",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.8",
     "morgan": "^1.10.0",
