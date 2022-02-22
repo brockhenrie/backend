@@ -2,6 +2,8 @@ const express = require("express");
 const OrderItem = require("../models/order-item.model");
 const router = express.Router();
 const Order = require("../models/order.model");
+const Product = require("../models/product.model");
+const stripe = require('stripe')('sk_test_51KVk8kKj3kdwtQkGBA2TqyvkwU8w4nsGp2sLpCcYzjHT8vcCZijCGJA2RRBuzxIVll9QF6B13CAtXR7UqvUF4BAk00j172vJ9K');
 
 router.get(`/`, async (req, res) => {
   const ordersList = await Order.find()
@@ -123,12 +125,10 @@ router.post(`/`, async (req, res) => {
 
   const totalPrices = await Promise.all( orderItemIdsResolved.map(async (orderItemId)=>{
       const orderItem = await OrderItem.findById(orderItemId).populate('product', 'price');
-      console.log(orderItem)
+      // console.log(orderItem)
       const totalPrice = orderItem.quantity * orderItem.product.price;
       return totalPrice;
   }))
-  console.log(totalPrices)
-
   const totalPrice = totalPrices.reduce((a,b)=> a + b, 0);
 
   let order = new Order({
@@ -190,6 +190,40 @@ router.delete("/:id", async (req, res) => {
     res.status(201).json(order);
   };
 });
+
+router.post('/create-checkout-session', async (req,res)=>{
+  const orderItems = req.body;
+  if(!orderItems) return res.status(400).json(orderError(400, 'No order items'))
+  console.log(orderItems)
+  // map order to stripe format
+  const lineItems= await Promise.all(
+    orderItems.map(async (orderItem)=>{
+      const product = await Product.findById(orderItem.product);
+     
+      return {
+        price_data:{
+          currency: 'usd',
+          product_data:{
+            name: product.name
+          },
+          unit_amount: product.price * 100,
+        },
+        quantity: orderItem.quantity
+      };
+    })
+  )
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: lineItems,
+    mode:'payment',
+    success_url: 'http://localhost:4200/success',
+    cancel_url:  'http://localhost:4200/paymentError',
+  });
+
+  res.json({
+    id: session.id
+  })
+})
 
 
 
